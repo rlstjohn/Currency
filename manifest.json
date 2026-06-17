@@ -1,0 +1,16 @@
+{
+  "name": "Currency — USD · AUD · IDR",
+  "short_name": "Currency",
+  "description": "Live USD, Australian Dollar, and Indonesian Rupiah converter.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#07090f",
+  "theme_color": "#07090f",
+  "icons": [
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

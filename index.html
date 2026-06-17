@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#07090f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="icon" type="image/png" href="./icon-192.png">
+<title>USD · AUD · IDR</title>
+<style>
+  :root{
+    --chrome:#07090f;
+    --card:#12151d;
+    --hair:rgba(255,255,255,.10);
+    --mono: ui-monospace,"Roboto Mono","SF Mono",Menlo,Consolas,monospace;
+    --sans: -apple-system,"Segoe UI",Roboto,system-ui,sans-serif;
+    --usd:#3fae7a;
+    --aud:#5b8dd9;
+    --idr:#e3675f;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    background:var(--chrome);color:#fff;font-family:var(--sans);-webkit-font-smoothing:antialiased;
+    display:flex;flex-direction:column;min-height:100dvh;
+  }
+  header{
+    flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;
+    padding:max(env(safe-area-inset-top),16px) 20px 14px;gap:10px;
+  }
+  .wordmark{font-family:var(--mono);font-size:11px;letter-spacing:.30em;text-transform:uppercase;color:rgba(255,255,255,.55)}
+  .wordmark b{color:#fff;font-weight:600}
+  .clearbtn{
+    font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:rgba(255,255,255,.7);
+    background:rgba(255,255,255,.06);border:1px solid var(--hair);border-radius:999px;padding:7px 13px;
+    cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .18s;
+  }
+  .clearbtn:hover{background:rgba(255,255,255,.12)}
+  .clearbtn:focus-visible{outline:2px solid var(--usd);outline-offset:2px}
+
+  main{flex:1 1 auto;display:flex;flex-direction:column;justify-content:center;gap:14px;padding:6px 16px 16px;max-width:560px;width:100%;margin:0 auto}
+
+  .chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:2px}
+  .chip{
+    font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:rgba(255,255,255,.8);
+    background:rgba(255,255,255,.05);border:1px solid var(--hair);border-radius:999px;padding:8px 14px;
+    cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .15s,border-color .15s;
+  }
+  .chip:hover{background:rgba(255,255,255,.12)}
+  .chip:active{border-color:var(--usd)}
+
+  .rowcard{
+    position:relative;display:flex;align-items:center;gap:14px;
+    background:var(--card);border:1px solid var(--hair);border-radius:16px;
+    padding:16px 18px 16px 20px;overflow:hidden;
+  }
+  .rowcard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--accent)}
+  .rc-usd{--accent:var(--usd)} .rc-aud{--accent:var(--aud)} .rc-idr{--accent:var(--idr)}
+  .denom{display:flex;flex-direction:column;gap:3px;min-width:78px}
+  .code{font-family:var(--mono);font-size:18px;font-weight:600;letter-spacing:.06em;color:#fff;display:flex;align-items:center;gap:8px}
+  .swatch{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent)}
+  .name{font-size:11px;letter-spacing:.02em;color:rgba(255,255,255,.5)}
+  .amtwrap{flex:1 1 auto;display:flex;align-items:baseline;justify-content:flex-end;gap:7px}
+  .sym{font-family:var(--mono);font-size:14px;color:rgba(255,255,255,.55)}
+  input.amt{
+    width:100%;background:transparent;border:none;outline:none;color:#fff;text-align:right;
+    font-family:var(--sans);font-size:clamp(26px,7vw,34px);font-weight:600;
+    font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;letter-spacing:-.01em;
+    -webkit-tap-highlight-color:transparent;min-width:0;
+  }
+  input.amt::placeholder{color:rgba(255,255,255,.25)}
+  .rowcard:focus-within{border-color:var(--accent)}
+
+  .ticker{
+    font-family:var(--mono);font-size:12px;line-height:1.7;letter-spacing:.02em;
+    color:rgba(255,255,255,.66);text-align:center;padding:6px 4px 0;
+  }
+  .ticker b{color:#fff;font-weight:600}
+  .ticker .l2{color:rgba(255,255,255,.5);font-size:11px}
+
+  footer{
+    flex:0 0 auto;font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:rgba(255,255,255,.5);
+    padding:12px 18px max(env(safe-area-inset-bottom),14px);text-align:center;border-top:1px solid var(--hair);
+    display:flex;flex-direction:column;gap:3px;
+  }
+  footer a{color:rgba(255,255,255,.6);text-decoration:none;border-bottom:1px dotted rgba(255,255,255,.3)}
+  .stale{color:var(--idr)}
+  .fresh{color:rgba(255,255,255,.5)}
+</style>
+</head>
+<body>
+  <header>
+    <div class="wordmark"><b>CURRENCY</b>&nbsp;· usd · aud · idr</div>
+    <button class="clearbtn" id="clearBtn">Clear</button>
+  </header>
+
+  <main>
+    <div class="chips" id="chips"></div>
+
+    <div class="rowcard rc-usd">
+      <div class="denom"><div class="code"><span class="swatch"></span>USD</div><div class="name">US Dollar</div></div>
+      <div class="amtwrap"><span class="sym">$</span><input class="amt" id="in-USD" inputmode="decimal" placeholder="0.00" autocomplete="off"></div>
+    </div>
+
+    <div class="rowcard rc-aud">
+      <div class="denom"><div class="code"><span class="swatch"></span>AUD</div><div class="name">Australian Dollar</div></div>
+      <div class="amtwrap"><span class="sym">A$</span><input class="amt" id="in-AUD" inputmode="decimal" placeholder="0.00" autocomplete="off"></div>
+    </div>
+
+    <div class="rowcard rc-idr">
+      <div class="denom"><div class="code"><span class="swatch"></span>IDR</div><div class="name">Indonesian Rupiah</div></div>
+      <div class="amtwrap"><span class="sym">Rp</span><input class="amt" id="in-IDR" inputmode="numeric" placeholder="0" autocomplete="off"></div>
+    </div>
+
+    <div class="ticker" id="ticker">Loading rates…</div>
+  </main>
+
+  <footer id="foot">
+    <div id="stamp">&nbsp;</div>
+    <div>Rates: <a href="https://www.exchangerate-api.com" target="_blank" rel="noopener">ExchangeRate-API</a> · updates daily</div>
+  </footer>
+
+<script>
+(function(){
+  "use strict";
+
+  const CURS=["USD","AUD","IDR"];
+  const STORE="rsj_fx_rates";
+  let rates=null;          // {USD:1, AUD:n, IDR:n}
+  let meta={updated:"",src:"",fetchedAt:0,stale:false};
+  let active=null;
+
+  const el=id=>document.getElementById(id);
+  const inputs={USD:el("in-USD"),AUD:el("in-AUD"),IDR:el("in-IDR")};
+
+  function fmt(n,cur){
+    if(n==null||isNaN(n)) return "";
+    if(cur==="IDR") return Math.round(n).toLocaleString("en-US");
+    return n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+  }
+  function parse(v){ if(v==null) return NaN; const s=String(v).replace(/[, ]/g,""); return s===""?NaN:parseFloat(s); }
+
+  function recalc(fromCur){
+    if(!rates) return;
+    const raw=parse(inputs[fromCur].value);
+    if(isNaN(raw)){ CURS.forEach(c=>{ if(c!==fromCur) inputs[c].value=""; }); return; }
+    const usd=raw/rates[fromCur];
+    CURS.forEach(c=>{ if(c!==fromCur) inputs[c].value=fmt(usd*rates[c],c); });
+  }
+
+  function paintTicker(){
+    if(!rates){ el("ticker").textContent="Rates unavailable — connect to load."; return; }
+    const tenkUsd=10000/rates.IDR;          // 10,000 IDR in USD
+    const audUsd=1/rates.AUD;               // 1 AUD in USD
+    el("ticker").innerHTML=
+      `1 USD = <b>${fmt(rates.AUD,"AUD")}</b> AUD · <b>Rp ${fmt(rates.IDR,"IDR")}</b>`+
+      `<div class="l2">Rp 10,000 ≈ $${fmt(tenkUsd,"USD")} · 1 AUD ≈ $${fmt(audUsd,"USD")}</div>`;
+  }
+
+  function paintStamp(){
+    const s=el("stamp");
+    if(!rates){ s.innerHTML='<span class="stale">no rates cached yet</span>'; return; }
+    let when=meta.updated||"";
+    when=when.replace(/\s*\(.*\)/,"").replace(/ \d{2}:\d{2}:\d{2}.*$/,"");
+    if(meta.stale) s.innerHTML='<span class="stale">offline · showing last rates '+(when?("from "+when):"")+'</span>';
+    else s.innerHTML='<span class="fresh">rates updated '+(when||"today")+'</span>';
+  }
+
+  function applyRates(r,m,stale){
+    rates=r; meta={updated:m.updated||"",src:m.src||"",fetchedAt:m.fetchedAt||Date.now(),stale:!!stale};
+    // refresh whichever field is the anchor (active, else USD if it has a value, else default 1)
+    const anchor = active && parse(inputs[active].value) ? active
+                 : (parse(inputs.USD.value)?"USD":null);
+    if(anchor) recalc(anchor);
+    else { inputs.USD.value="1"; recalc("USD"); }
+    paintTicker(); paintStamp();
+  }
+
+  function loadCache(){
+    try{
+      const raw=localStorage.getItem(STORE);
+      if(!raw) return false;
+      const d=JSON.parse(raw);
+      if(d&&d.rates&&d.rates.AUD&&d.rates.IDR){ applyRates(d.rates,{updated:d.updated,src:d.src,fetchedAt:d.fetchedAt},true); return true; }
+    }catch(e){}
+    return false;
+  }
+  function saveCache(){
+    try{ localStorage.setItem(STORE,JSON.stringify({rates,updated:meta.updated,src:meta.src,fetchedAt:meta.fetchedAt})); }catch(e){}
+  }
+
+  async function fetchPrimary(){
+    const r=await fetch("https://open.er-api.com/v6/latest/USD",{cache:"no-store"});
+    if(!r.ok) throw 0;
+    const d=await r.json();
+    if(!d||!d.rates||!d.rates.AUD||!d.rates.IDR) throw 0;
+    return {rates:{USD:1,AUD:d.rates.AUD,IDR:d.rates.IDR},updated:(d.time_last_update_utc||"").replace(/^\w+, /,""),src:"ExchangeRate-API"};
+  }
+  async function fetchFallback(){
+    const r=await fetch("https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json",{cache:"no-store"});
+    if(!r.ok) throw 0;
+    const d=await r.json();
+    if(!d||!d.usd||!d.usd.aud||!d.usd.idr) throw 0;
+    return {rates:{USD:1,AUD:d.usd.aud,IDR:d.usd.idr},updated:(d.date||"")+"",src:"fawazahmed0"};
+  }
+  async function refresh(){
+    let got=null;
+    try{ got=await fetchPrimary(); }catch(e){ try{ got=await fetchFallback(); }catch(e2){} }
+    if(got){ applyRates(got.rates,{updated:got.updated,src:got.src,fetchedAt:Date.now()},false); saveCache(); }
+    else { if(!rates){ paintTicker(); paintStamp(); } else { meta.stale=true; paintStamp(); } }
+  }
+
+  // quick chips (USD presets)
+  const chipVals=[1,5,20,100];
+  const chipWrap=el("chips");
+  chipVals.forEach(v=>{
+    const b=document.createElement("button");b.className="chip";b.textContent="$"+v;
+    b.addEventListener("click",()=>{ inputs.USD.value=String(v); active="USD"; recalc("USD"); inputs.USD.blur(); });
+    chipWrap.appendChild(b);
+  });
+
+  // wire inputs
+  CURS.forEach(c=>{
+    const inp=inputs[c];
+    inp.addEventListener("focus",()=>{ active=c; });
+    inp.addEventListener("input",()=>{ active=c; recalc(c); });
+    inp.addEventListener("blur",()=>{ const n=parse(inp.value); if(!isNaN(n)) inp.value=fmt(n,c); });
+  });
+  el("clearBtn").addEventListener("click",()=>{ CURS.forEach(c=>inputs[c].value=""); active=null; });
+
+  // boot: show cached instantly, then refresh; refresh again when reopened online
+  loadCache();
+  refresh();
+  document.addEventListener("visibilitychange",()=>{ if(!document.hidden) refresh(); });
+  window.addEventListener("online",refresh);
+
+  if("serviceWorker" in navigator){
+    window.addEventListener("load",()=>{ navigator.serviceWorker.register("./sw.js").catch(()=>{}); });
+  }
+})();
+</script>
+</body>
+</html>
