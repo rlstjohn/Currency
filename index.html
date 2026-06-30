@@ -23,14 +23,23 @@
     --idr:#e3675f;
   }
   *{margin:0;padding:0;box-sizing:border-box}
-  html,body{height:100%}
+  html{height:100%}
   body{
     background:var(--chrome);color:#fff;font-family:var(--sans);-webkit-font-smoothing:antialiased;
-    display:flex;flex-direction:column;min-height:100dvh;
+    min-height:100dvh;overscroll-behavior-y:contain;
   }
+  .hidden{display:none !important}
+
+  .pull{
+    position:fixed;top:0;left:0;right:0;text-align:center;z-index:60;pointer-events:none;
+    font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:rgba(255,255,255,.7);
+    padding:10px;opacity:0;transform:translateY(-6px);transition:opacity .15s,transform .15s;
+  }
+
   header{
-    flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;
-    padding:max(env(safe-area-inset-top),16px) 20px 14px;gap:10px;
+    position:sticky;top:0;z-index:40;background:var(--chrome);
+    display:flex;align-items:center;justify-content:space-between;
+    padding:max(env(safe-area-inset-top),16px) 20px 12px;gap:10px;border-bottom:1px solid var(--hair);
   }
   .wordmark{font-family:var(--mono);font-size:11px;letter-spacing:.30em;text-transform:uppercase;color:rgba(255,255,255,.55)}
   .wordmark b{color:#fff;font-weight:600}
@@ -42,7 +51,15 @@
   .clearbtn:hover{background:rgba(255,255,255,.12)}
   .clearbtn:focus-visible{outline:2px solid var(--usd);outline-offset:2px}
 
-  main{flex:1 1 auto;display:flex;flex-direction:column;justify-content:center;gap:14px;padding:6px 16px 16px;max-width:560px;width:100%;margin:0 auto}
+  main{display:flex;flex-direction:column;gap:14px;padding:14px 16px 28px;max-width:560px;width:100%;margin:0 auto}
+
+  .segwrap{display:flex;gap:4px;background:rgba(255,255,255,.05);border:1px solid var(--hair);border-radius:999px;padding:4px;width:100%}
+  .seg{
+    flex:1 1 0;font-family:var(--mono);font-size:13px;letter-spacing:.05em;color:rgba(255,255,255,.62);
+    background:transparent;border:none;border-radius:999px;padding:11px 8px;cursor:pointer;
+    -webkit-tap-highlight-color:transparent;transition:background .18s,color .18s;
+  }
+  .seg-active{background:rgba(255,255,255,.12);color:#fff}
 
   .chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:2px}
   .chip{
@@ -54,17 +71,8 @@
   .chip:active{border-color:var(--usd)}
   .chip-idr{border-color:rgba(227,103,95,.45)}
   .chip-idr:active{border-color:var(--idr)}
-
-  .idref{
-    border:1px solid var(--hair);border-radius:14px;background:rgba(227,103,95,.06);
-    padding:11px 14px 12px;display:flex;flex-direction:column;gap:8px;
-  }
-  .idref .ttl{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.45)}
-  .idref .row{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
-  .idref .rp{font-family:var(--mono);font-size:13px;font-weight:600;color:#fff;letter-spacing:.02em}
-  .idref .val{font-family:var(--mono);font-size:12px;color:rgba(255,255,255,.62);text-align:right}
-  .idref .val b{color:#fff;font-weight:600}
-  .idref .val .a{color:var(--aud)}
+  .chip-aud{border-color:rgba(91,141,217,.45)}
+  .chip-aud:active{border-color:var(--aud)}
 
   .rowcard{
     position:relative;display:flex;align-items:center;gap:14px;
@@ -90,28 +98,52 @@
 
   .ticker{
     font-family:var(--mono);font-size:12px;line-height:1.7;letter-spacing:.02em;
-    color:rgba(255,255,255,.66);text-align:center;padding:6px 4px 0;
+    color:rgba(255,255,255,.66);text-align:center;padding:4px 4px 0;
   }
   .ticker b{color:#fff;font-weight:600}
   .ticker .l2{color:rgba(255,255,255,.5);font-size:11px}
+  .mv{font-size:11px;font-weight:600;letter-spacing:.01em;margin-left:6px;white-space:nowrap}
+  .mv-up{color:#3fae7a}
+  .mv-down{color:#e3675f}
+
+  .refs{display:flex;flex-direction:column;gap:12px}
+  .refpanel{
+    border:1px solid var(--hair);border-radius:14px;background:rgba(255,255,255,.03);
+    padding:11px 14px 12px;display:flex;flex-direction:column;gap:8px;
+  }
+  .refpanel.rp-idr{background:rgba(227,103,95,.06)}
+  .refpanel.rp-aud{background:rgba(91,141,217,.06)}
+  .refpanel .ttl{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.45)}
+  .refpanel .row{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+  .refpanel .lbl{font-family:var(--mono);font-size:13px;font-weight:600;color:#fff;letter-spacing:.02em}
+  .refpanel .val{font-family:var(--mono);font-size:12px;color:rgba(255,255,255,.66);text-align:right}
+  .refpanel .val b{color:#fff;font-weight:600}
 
   footer{
-    flex:0 0 auto;font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:rgba(255,255,255,.5);
-    padding:12px 18px max(env(safe-area-inset-bottom),14px);text-align:center;border-top:1px solid var(--hair);
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:rgba(255,255,255,.5);
+    padding:12px 18px max(env(safe-area-inset-bottom),16px);text-align:center;border-top:1px solid var(--hair);
     display:flex;flex-direction:column;gap:3px;
   }
   footer a{color:rgba(255,255,255,.6);text-decoration:none;border-bottom:1px dotted rgba(255,255,255,.3)}
+  #stamp{cursor:pointer}
   .stale{color:var(--idr)}
   .fresh{color:rgba(255,255,255,.5)}
 </style>
 </head>
 <body>
+  <div class="pull" id="pull">Pull to refresh</div>
+
   <header>
-    <div class="wordmark"><b>CURRENCY</b>&nbsp;· usd · aud · idr</div>
+    <div class="wordmark" id="wordmark"><b>CURRENCY</b>&nbsp;· usd · aud · idr</div>
     <button class="clearbtn" id="clearBtn">Clear</button>
   </header>
 
   <main>
+    <div class="segwrap" id="segwrap">
+      <button class="seg" data-tab="bali">Bali 🇮🇩</button>
+      <button class="seg" data-tab="au">Australia 🇦🇺</button>
+    </div>
+
     <div class="chips" id="chips"></div>
 
     <div class="rowcard rc-usd">
@@ -124,40 +156,102 @@
       <div class="amtwrap"><span class="sym">A$</span><input class="amt" id="in-AUD" inputmode="decimal" placeholder="0.00" autocomplete="off"></div>
     </div>
 
-    <div class="rowcard rc-idr">
+    <div class="rowcard rc-idr" id="card-idr">
       <div class="denom"><div class="code"><span class="swatch"></span>IDR</div><div class="name">Indonesian Rupiah</div></div>
       <div class="amtwrap"><span class="sym">Rp</span><input class="amt" id="in-IDR" inputmode="numeric" placeholder="0" autocomplete="off"></div>
     </div>
 
     <div class="ticker" id="ticker">Loading rates…</div>
 
-    <div class="idref" id="idref"></div>
+    <div class="refs" id="refs-bali"></div>
+    <div class="refs" id="refs-au"></div>
   </main>
 
   <footer id="foot">
     <div id="stamp">&nbsp;</div>
-    <div>Rates: <a href="https://www.exchangerate-api.com" target="_blank" rel="noopener">ExchangeRate-API</a> · updates daily</div>
+    <div>Rates: <a href="https://www.exchangerate-api.com" target="_blank" rel="noopener">ExchangeRate-API</a> · updates daily · tap status to refresh</div>
   </footer>
 
 <script>
 (function(){
   "use strict";
 
+  // ====================== CONFIG ===========================================
+  // SHOW_BALI: flip to FALSE after the Bali trip to hide the Bali tab and ALL
+  // Rupiah content (IDR card, IDR chips, Bali references), leaving a clean
+  // AUD <-> USD app. This is the ONLY setting you need to change.
+  const SHOW_BALI = true;
+  // =========================================================================
+
   const CURS=["USD","AUD","IDR"];
-  const STORE="rsj_fx_rates";
-  let rates=null;          // {USD:1, AUD:n, IDR:n}
+  const STORE="rsj_fx_rates";     // last good rates (offline fallback)
+  const HIST="rsj_fx_hist";       // daily rate snapshots (day-over-day movement)
+  const TABKEY="rsj_fx_tab";      // remember last selected tab
+  let rates=null;                 // {USD:1, AUD:n, IDR:n}
   let meta={updated:"",src:"",fetchedAt:0,stale:false};
   let active=null;
+  let activeTab = SHOW_BALI ? "bali" : "au";
 
   const el=id=>document.getElementById(id);
   const inputs={USD:el("in-USD"),AUD:el("in-AUD"),IDR:el("in-IDR")};
+  const chipWrap=el("chips");
+  const pull=el("pull");
 
+  /* ---------- formatting + safe math evaluator ---------- */
   function fmt(n,cur){
     if(n==null||isNaN(n)) return "";
     if(cur==="IDR") return Math.round(n).toLocaleString("en-US");
     return n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
   }
-  function parse(v){ if(v==null) return NaN; const s=String(v).replace(/[, ]/g,""); return s===""?NaN:parseFloat(s); }
+  function money(n,cur){
+    if(cur==="IDR") return "Rp "+fmt(n,"IDR");
+    if(cur==="AUD") return "A$"+fmt(n,"AUD");
+    return "$"+fmt(n,"USD");
+  }
+  // Safe calculator: accepts digits . + - * / ( ) only, NO eval/Function.
+  // Tokenize -> shunting-yard to RPN -> evaluate. Returns a number or NaN.
+  function safeEval(v){
+    if(v==null) return NaN;
+    let s=String(v).replace(/,/g,"").trim();
+    if(s==="") return NaN;
+    if(!/^[0-9.+\-*/() ]+$/.test(s)) return NaN;     // whitelist guard
+    const toks=s.match(/(\d+\.?\d*|\.\d+|[+\-*/()])/g);
+    if(!toks) return NaN;
+    const out=[], ops=[], prec={"+":1,"-":1,"*":2,"/":2};
+    let prev=null;
+    for(let i=0;i<toks.length;i++){
+      const t=toks[i];
+      if(/^[\d.]/.test(t)){ out.push(parseFloat(t)); prev="num"; }
+      else if(t==="("){ ops.push(t); prev="("; }
+      else if(t===")"){
+        while(ops.length && ops[ops.length-1]!=="(") out.push(ops.pop());
+        if(!ops.length) return NaN; ops.pop(); prev=")";
+      } else {
+        if((t==="-"||t==="+") && (prev===null||prev==="("||prev==="op")) out.push(0); // unary
+        while(ops.length && prec[ops[ops.length-1]]>=prec[t]) out.push(ops.pop());
+        ops.push(t); prev="op";
+      }
+    }
+    while(ops.length){ const o=ops.pop(); if(o==="(") return NaN; out.push(o); }
+    const st=[];
+    for(const tk of out){
+      if(typeof tk==="number"){ st.push(tk); continue; }
+      const b=st.pop(), a=st.pop();
+      if(a===undefined||b===undefined) return NaN;
+      let r;
+      if(tk==="+") r=a+b; else if(tk==="-") r=a-b;
+      else if(tk==="*") r=a*b; else if(tk==="/") r=(b===0?NaN:a/b);
+      else return NaN;
+      st.push(r);
+    }
+    return st.length===1 ? st[0] : NaN;
+  }
+  const parse=v=>safeEval(v);
+
+  /* ---------- conversions (all from live rates) ---------- */
+  const usdToAud=u=>u*rates.AUD, usdToIdr=u=>u*rates.IDR;
+  const idrToUsd=i=>i/rates.IDR, idrToAud=i=>i/rates.IDR*rates.AUD;
+  const audToUsd=a=>a/rates.AUD, audToIdr=a=>a/rates.AUD*rates.IDR;
 
   function recalc(fromCur){
     if(!rates) return;
@@ -167,48 +261,114 @@
     CURS.forEach(c=>{ if(c!==fromCur) inputs[c].value=fmt(usd*rates[c],c); });
   }
 
+  /* ---------- day-over-day movement ---------- */
+  function todayStr(){
+    const d=new Date();
+    return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  }
+  function recordSnapshot(){              // only called on a FRESH online fetch
+    if(!rates) return;
+    let h={}; try{ h=JSON.parse(localStorage.getItem(HIST)||"{}"); }catch(e){}
+    h[todayStr()]={AUD:rates.AUD,IDR:rates.IDR};
+    const keys=Object.keys(h).sort();
+    while(keys.length>7){ delete h[keys.shift()]; }   // keep ~a week
+    try{ localStorage.setItem(HIST,JSON.stringify(h)); }catch(e){}
+  }
+  function movement(cur){                 // today's rate vs most recent prior DAY
+    if(!rates) return null;
+    let h={}; try{ h=JSON.parse(localStorage.getItem(HIST)||"{}"); }catch(e){}
+    const t=todayStr();
+    const prior=Object.keys(h).filter(d=>d<t).sort();
+    if(!prior.length) return null;
+    const prev=h[prior[prior.length-1]][cur];
+    if(!prev) return null;
+    const pct=(rates[cur]-prev)/prev*100;
+    if(Math.abs(pct)<0.01) return {pct:0,dir:"flat"};
+    return {pct:pct, dir: pct>0?"up":"down"};
+  }
+  function movHtml(cur){
+    const m=movement(cur);
+    if(!m||m.dir==="flat") return "";
+    const arrow=m.dir==="up"?"▲":"▼";
+    const cls=m.dir==="up"?"mv-up":"mv-down";
+    const sign=m.pct>0?"+":"";
+    return ` <span class="mv ${cls}">${arrow} ${sign}${m.pct.toFixed(2)}%</span>`;
+  }
+
+  /* ---------- painting ---------- */
+  function panel(title, rows, cls){
+    return `<div class="refpanel ${cls||""}"><div class="ttl">${title}</div>`+
+      rows.map(r=>`<div class="row"><span class="lbl">${r.lbl}</span><span class="val">${r.val}</span></div>`).join("")+
+      `</div>`;
+  }
+  function paintRefs(){
+    const bali=el("refs-bali"), au=el("refs-au");
+    if(!rates){ bali.innerHTML=""; au.innerHTML=""; return; }
+
+    if(SHOW_BALI){
+      const quick = panel("Rupiah quick reference",
+        [100000,1000000,10000000].map(i=>({lbl:"Rp "+fmt(i,"IDR"),
+          val:"≈ <b>"+money(idrToUsd(i),"USD")+"</b> · <b>"+money(idrToAud(i),"AUD")+"</b>"})), "rp-idr");
+      const notes = panel("Note values (cash in hand)",
+        [10000,20000,50000,100000].map(i=>({lbl:"Rp "+fmt(i,"IDR"),
+          val:money(idrToUsd(i),"USD")+" · "+money(idrToAud(i),"AUD")})), "rp-idr");
+      const reverse = panel("Dollars → Rupiah", [
+        {lbl:"$1",  val:"≈ "+money(usdToIdr(1),"IDR")},
+        {lbl:"$5",  val:"≈ "+money(usdToIdr(5),"IDR")},
+        {lbl:"$20", val:"≈ "+money(usdToIdr(20),"IDR")},
+        {lbl:"$50", val:"≈ "+money(usdToIdr(50),"IDR")},
+        {lbl:"A$5", val:"≈ "+money(audToIdr(5),"IDR")},
+        {lbl:"A$20",val:"≈ "+money(audToIdr(20),"IDR")},
+        {lbl:"A$50",val:"≈ "+money(audToIdr(50),"IDR")}
+      ], "rp-idr");
+      const atm = panel("ATM withdrawal",
+        [1250000,2500000,3000000].map(i=>({lbl:"Rp "+fmt(i,"IDR"),
+          val:"≈ <b>"+money(idrToUsd(i),"USD")+"</b> · <b>"+money(idrToAud(i),"AUD")+"</b>"})), "rp-idr");
+      bali.innerHTML = quick+notes+reverse+atm;
+    } else { bali.innerHTML=""; }
+
+    const a2u = panel("Aussie → US dollars",
+      [5,10,20,50,100].map(a=>({lbl:"A$"+a, val:"≈ <b>"+money(audToUsd(a),"USD")+"</b>"})), "rp-aud");
+    const u2a = panel("US → Aussie dollars",
+      [5,10,20,50,100].map(u=>({lbl:"$"+u, val:"≈ <b>"+money(usdToAud(u),"AUD")+"</b>"})), "rp-aud");
+    au.innerHTML = a2u+u2a;
+  }
+
   function paintTicker(){
-    if(!rates){ el("ticker").textContent="Rates unavailable — connect to load."; return; }
-    const tenkUsd=10000/rates.IDR;          // 10,000 IDR in USD
-    const audUsd=1/rates.AUD;               // 1 AUD in USD
-    el("ticker").innerHTML=
-      `1 USD = <b>${fmt(rates.AUD,"AUD")}</b> AUD · <b>Rp ${fmt(rates.IDR,"IDR")}</b>`+
-      `<div class="l2">Rp 10,000 ≈ $${fmt(tenkUsd,"USD")} · 1 AUD ≈ $${fmt(audUsd,"USD")}</div>`;
+    if(!rates){ el("ticker").textContent="Rates unavailable — pull down to refresh."; return; }
+    const audUsd=1/rates.AUD;
+    if(SHOW_BALI && activeTab==="bali"){
+      const tenkUsd=10000/rates.IDR;
+      el("ticker").innerHTML=
+        `1 USD = <b>${fmt(rates.AUD,"AUD")}</b> AUD · <b>Rp ${fmt(rates.IDR,"IDR")}</b>${movHtml("IDR")}`+
+        `<div class="l2">Rp 10,000 ≈ $${fmt(tenkUsd,"USD")} · 1 AUD ≈ $${fmt(audUsd,"USD")}</div>`;
+    } else {
+      el("ticker").innerHTML=
+        `1 USD = <b>${fmt(rates.AUD,"AUD")}</b> AUD${movHtml("AUD")}`+
+        `<div class="l2">1 AUD ≈ $${fmt(audUsd,"USD")}</div>`;
+    }
   }
 
-  // Always-visible Rupiah quick reference (Bali). Computes from the live rate.
-  function paintIdRef(){
-    const box=el("idref");
-    if(!box) return;
-    if(!rates){ box.style.display="none"; box.innerHTML=""; return; }
-    box.style.display="flex";
-    const conv=idr=>{ const usd=idr/rates.IDR; return {usd:usd,aud:usd*rates.AUD}; };
-    const m=conv(1000000), k=conv(100000);
-    box.innerHTML=
-      `<div class="ttl">Rupiah quick reference</div>`+
-      `<div class="row"><span class="rp">Rp 1,000,000</span><span class="val">≈ <b>$${fmt(m.usd,"USD")}</b> · <b class="a">A$${fmt(m.aud,"AUD")}</b></span></div>`+
-      `<div class="row"><span class="rp">Rp 100,000</span><span class="val">≈ <b>$${fmt(k.usd,"USD")}</b> · <b class="a">A$${fmt(k.aud,"AUD")}</b></span></div>`;
-  }
-
+  function hhmm(ts){ const d=new Date(ts); return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"); }
   function paintStamp(){
     const s=el("stamp");
-    if(!rates){ s.innerHTML='<span class="stale">no rates cached yet</span>'; return; }
-    let when=meta.updated||"";
-    when=when.replace(/\s*\(.*\)/,"").replace(/ \d{2}:\d{2}:\d{2}.*$/,"");
-    if(meta.stale) s.innerHTML='<span class="stale">offline · showing last rates '+(when?("from "+when):"")+'</span>';
-    else s.innerHTML='<span class="fresh">rates updated '+(when||"today")+'</span>';
+    if(!rates){ s.innerHTML='<span class="stale">no rates cached yet — tap to retry</span>'; return; }
+    let when=(meta.updated||"").replace(/\s*\(.*\)/,"").replace(/ \d{2}:\d{2}:\d{2}.*$/,"");
+    const fetched = meta.fetchedAt ? " · fetched "+hhmm(meta.fetchedAt) : "";
+    if(meta.stale) s.innerHTML='<span class="stale">offline · rates from '+(when||"earlier")+fetched+'</span>';
+    else s.innerHTML='<span class="fresh">rates updated '+(when||"today")+fetched+'</span>';
   }
 
+  function paintAll(){ paintTicker(); paintRefs(); paintStamp(); }
+
+  /* ---------- rates: apply / cache / fetch ---------- */
   function applyRates(r,m,stale){
     rates=r; meta={updated:m.updated||"",src:m.src||"",fetchedAt:m.fetchedAt||Date.now(),stale:!!stale};
-    // refresh whichever field is the anchor (active, else USD if it has a value, else default 1)
-    const anchor = active && parse(inputs[active].value) ? active
-                 : (parse(inputs.USD.value)?"USD":null);
+    const anchor = active && parse(inputs[active].value) ? active : (parse(inputs.USD.value)?"USD":null);
     if(anchor) recalc(anchor);
     else { inputs.USD.value="1"; recalc("USD"); }
-    paintTicker(); paintIdRef(); paintStamp();
+    paintAll();
   }
-
   function loadCache(){
     try{
       const raw=localStorage.getItem(STORE);
@@ -221,7 +381,6 @@
   function saveCache(){
     try{ localStorage.setItem(STORE,JSON.stringify({rates,updated:meta.updated,src:meta.src,fetchedAt:meta.fetchedAt})); }catch(e){}
   }
-
   async function fetchPrimary(){
     const r=await fetch("https://open.er-api.com/v6/latest/USD",{cache:"no-store"});
     if(!r.ok) throw 0;
@@ -236,30 +395,75 @@
     if(!d||!d.usd||!d.usd.aud||!d.usd.idr) throw 0;
     return {rates:{USD:1,AUD:d.usd.aud,IDR:d.usd.idr},updated:(d.date||"")+"",src:"fawazahmed0"};
   }
-  async function refresh(){
+  let busy=false;
+  async function refresh(manual){
+    if(busy) return; busy=true;
+    if(manual){ showPull("Refreshing…"); }
     let got=null;
     try{ got=await fetchPrimary(); }catch(e){ try{ got=await fetchFallback(); }catch(e2){} }
-    if(got){ applyRates(got.rates,{updated:got.updated,src:got.src,fetchedAt:Date.now()},false); saveCache(); }
-    else { if(!rates){ paintTicker(); paintIdRef(); paintStamp(); } else { meta.stale=true; paintStamp(); } }
+    if(got){
+      applyRates(got.rates,{updated:got.updated,src:got.src,fetchedAt:Date.now()},false);
+      saveCache(); recordSnapshot(); paintAll();   // record day snapshot then repaint movement
+    } else {
+      if(!rates){ paintAll(); } else { meta.stale=true; paintStamp(); }
+    }
+    if(manual){ hidePull(); }
+    busy=false;
   }
 
-  // quick chips (USD presets)
-  const chipVals=[1,5,20,100];
-  const chipWrap=el("chips");
-  chipVals.forEach(v=>{
-    const b=document.createElement("button");b.className="chip";b.textContent="$"+v;
-    b.addEventListener("click",()=>{ inputs.USD.value=String(v); active="USD"; recalc("USD"); inputs.USD.blur(); });
-    chipWrap.appendChild(b);
-  });
-  // IDR presets (Bali) — populate the IDR field, existing recalc shows USD + AUD
-  const idrChips=[{label:"Rp 100K",val:100000},{label:"Rp 1M",val:1000000}];
-  idrChips.forEach(c=>{
-    const b=document.createElement("button");b.className="chip chip-idr";b.textContent=c.label;
-    b.addEventListener("click",()=>{ inputs.IDR.value=fmt(c.val,"IDR"); active="IDR"; recalc("IDR"); inputs.IDR.blur(); });
-    chipWrap.appendChild(b);
+  /* ---------- chips (tab-aware; USD chips always kept) ---------- */
+  function mkChip(label,cls,fn){ const b=document.createElement("button"); b.className="chip"+(cls?" "+cls:""); b.textContent=label; b.addEventListener("click",fn); return b; }
+  function setField(cur,val){ const n=parse(val); inputs[cur].value=isNaN(n)?val:fmt(n,cur); active=cur; recalc(cur); }
+  function buildChips(tab){
+    chipWrap.innerHTML="";
+    [1,5,20,100].forEach(v=>chipWrap.appendChild(mkChip("$"+v,"",()=>setField("USD",String(v)))));
+    if(SHOW_BALI && tab==="bali"){
+      [{l:"Rp 100K",v:100000},{l:"Rp 1M",v:1000000}].forEach(c=>chipWrap.appendChild(mkChip(c.l,"chip-idr",()=>setField("IDR",fmt(c.v,"IDR")))));
+    }
+    if(tab==="au"){
+      [10,50,100].forEach(v=>chipWrap.appendChild(mkChip("A$"+v,"chip-aud",()=>setField("AUD",String(v)))));
+    }
+  }
+
+  /* ---------- tabs ---------- */
+  function setTab(t){
+    if(!SHOW_BALI) t="au";
+    activeTab=t; try{ localStorage.setItem(TABKEY,t); }catch(e){}
+    document.querySelectorAll(".seg").forEach(b=>b.classList.toggle("seg-active", b.dataset.tab===t));
+    const bali = (t==="bali" && SHOW_BALI);
+    el("card-idr").classList.toggle("hidden", !bali);
+    el("refs-bali").classList.toggle("hidden", !bali);
+    el("refs-au").classList.toggle("hidden", t==="bali");
+    buildChips(t);
+    paintTicker();
+  }
+  function buildSeg(){
+    const seg=el("segwrap");
+    if(!SHOW_BALI){ seg.classList.add("hidden"); return; }
+    seg.querySelectorAll(".seg").forEach(b=>b.addEventListener("click",()=>setTab(b.dataset.tab)));
+  }
+
+  /* ---------- pull-to-refresh ---------- */
+  function showPull(t){ pull.textContent=t; pull.style.opacity="1"; pull.style.transform="translateY(8px)"; }
+  function hidePull(){ pull.style.opacity="0"; pull.style.transform="translateY(-6px)"; }
+  let pStart=null, pReady=false;
+  window.addEventListener("touchstart",e=>{ if(window.scrollY<=0 && e.touches.length===1) pStart=e.touches[0].clientY; },{passive:true});
+  window.addEventListener("touchmove",e=>{
+    if(pStart==null) return;
+    const dy=e.touches[0].clientY-pStart;
+    if(dy>6 && window.scrollY<=0){
+      pReady=dy>70;
+      pull.textContent=pReady?"Release to refresh":"Pull to refresh";
+      pull.style.opacity=String(Math.min(dy/70,1));
+      pull.style.transform="translateY("+Math.min(dy*0.4,40)+"px)";
+    }
+  },{passive:true});
+  window.addEventListener("touchend",()=>{
+    if(pStart!=null){ if(pReady) refresh(true); else hidePull(); }
+    pStart=null; pReady=false;
   });
 
-  // wire inputs
+  /* ---------- input wiring ---------- */
   CURS.forEach(c=>{
     const inp=inputs[c];
     inp.addEventListener("focus",()=>{ active=c; });
@@ -267,12 +471,17 @@
     inp.addEventListener("blur",()=>{ const n=parse(inp.value); if(!isNaN(n)) inp.value=fmt(n,c); });
   });
   el("clearBtn").addEventListener("click",()=>{ CURS.forEach(c=>inputs[c].value=""); active=null; });
+  el("stamp").addEventListener("click",()=>refresh(true));
 
-  // boot: show cached instantly, then refresh; refresh again when reopened online
+  /* ---------- boot ---------- */
+  el("wordmark").innerHTML="<b>CURRENCY</b>&nbsp;· usd · aud"+(SHOW_BALI?" · idr":"");
+  if(SHOW_BALI){ try{ const t=localStorage.getItem(TABKEY); if(t==="au"||t==="bali") activeTab=t; }catch(e){} }
+  buildSeg();
+  setTab(activeTab);
   loadCache();
   refresh();
   document.addEventListener("visibilitychange",()=>{ if(!document.hidden) refresh(); });
-  window.addEventListener("online",refresh);
+  window.addEventListener("online",()=>refresh());
 
   if("serviceWorker" in navigator){
     window.addEventListener("load",()=>{ navigator.serviceWorker.register("./sw.js").catch(()=>{}); });
