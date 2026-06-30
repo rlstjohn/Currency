@@ -52,6 +52,19 @@
   }
   .chip:hover{background:rgba(255,255,255,.12)}
   .chip:active{border-color:var(--usd)}
+  .chip-idr{border-color:rgba(227,103,95,.45)}
+  .chip-idr:active{border-color:var(--idr)}
+
+  .idref{
+    border:1px solid var(--hair);border-radius:14px;background:rgba(227,103,95,.06);
+    padding:11px 14px 12px;display:flex;flex-direction:column;gap:8px;
+  }
+  .idref .ttl{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.45)}
+  .idref .row{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+  .idref .rp{font-family:var(--mono);font-size:13px;font-weight:600;color:#fff;letter-spacing:.02em}
+  .idref .val{font-family:var(--mono);font-size:12px;color:rgba(255,255,255,.62);text-align:right}
+  .idref .val b{color:#fff;font-weight:600}
+  .idref .val .a{color:var(--aud)}
 
   .rowcard{
     position:relative;display:flex;align-items:center;gap:14px;
@@ -117,6 +130,8 @@
     </div>
 
     <div class="ticker" id="ticker">Loading rates…</div>
+
+    <div class="idref" id="idref"></div>
   </main>
 
   <footer id="foot">
@@ -161,6 +176,20 @@
       `<div class="l2">Rp 10,000 ≈ $${fmt(tenkUsd,"USD")} · 1 AUD ≈ $${fmt(audUsd,"USD")}</div>`;
   }
 
+  // Always-visible Rupiah quick reference (Bali). Computes from the live rate.
+  function paintIdRef(){
+    const box=el("idref");
+    if(!box) return;
+    if(!rates){ box.style.display="none"; box.innerHTML=""; return; }
+    box.style.display="flex";
+    const conv=idr=>{ const usd=idr/rates.IDR; return {usd:usd,aud:usd*rates.AUD}; };
+    const m=conv(1000000), k=conv(100000);
+    box.innerHTML=
+      `<div class="ttl">Rupiah quick reference</div>`+
+      `<div class="row"><span class="rp">Rp 1,000,000</span><span class="val">≈ <b>$${fmt(m.usd,"USD")}</b> · <b class="a">A$${fmt(m.aud,"AUD")}</b></span></div>`+
+      `<div class="row"><span class="rp">Rp 100,000</span><span class="val">≈ <b>$${fmt(k.usd,"USD")}</b> · <b class="a">A$${fmt(k.aud,"AUD")}</b></span></div>`;
+  }
+
   function paintStamp(){
     const s=el("stamp");
     if(!rates){ s.innerHTML='<span class="stale">no rates cached yet</span>'; return; }
@@ -177,7 +206,7 @@
                  : (parse(inputs.USD.value)?"USD":null);
     if(anchor) recalc(anchor);
     else { inputs.USD.value="1"; recalc("USD"); }
-    paintTicker(); paintStamp();
+    paintTicker(); paintIdRef(); paintStamp();
   }
 
   function loadCache(){
@@ -211,7 +240,7 @@
     let got=null;
     try{ got=await fetchPrimary(); }catch(e){ try{ got=await fetchFallback(); }catch(e2){} }
     if(got){ applyRates(got.rates,{updated:got.updated,src:got.src,fetchedAt:Date.now()},false); saveCache(); }
-    else { if(!rates){ paintTicker(); paintStamp(); } else { meta.stale=true; paintStamp(); } }
+    else { if(!rates){ paintTicker(); paintIdRef(); paintStamp(); } else { meta.stale=true; paintStamp(); } }
   }
 
   // quick chips (USD presets)
@@ -220,6 +249,13 @@
   chipVals.forEach(v=>{
     const b=document.createElement("button");b.className="chip";b.textContent="$"+v;
     b.addEventListener("click",()=>{ inputs.USD.value=String(v); active="USD"; recalc("USD"); inputs.USD.blur(); });
+    chipWrap.appendChild(b);
+  });
+  // IDR presets (Bali) — populate the IDR field, existing recalc shows USD + AUD
+  const idrChips=[{label:"Rp 100K",val:100000},{label:"Rp 1M",val:1000000}];
+  idrChips.forEach(c=>{
+    const b=document.createElement("button");b.className="chip chip-idr";b.textContent=c.label;
+    b.addEventListener("click",()=>{ inputs.IDR.value=fmt(c.val,"IDR"); active="IDR"; recalc("IDR"); inputs.IDR.blur(); });
     chipWrap.appendChild(b);
   });
 
